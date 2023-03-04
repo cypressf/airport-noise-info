@@ -16,7 +16,7 @@
             a {
                 color: inherit;
             }
-            main {
+            aside {
                 display: flex;
             }
             h1,
@@ -46,7 +46,7 @@
                 body {
                     padding: 10px;
                 }
-                main {
+                aside {
                     flex-direction: column;
                 }
                 .report + .report {
@@ -68,8 +68,7 @@
                 angle of attack.
             </p>
         </header>
-
-        <main>
+        <aside>
             <a
                 id="massport"
                 class="report"
@@ -80,6 +79,25 @@
             <a id="faa" class="report" href="https://noise.faa.gov/noise/"
                 >Report noise to the FAA</a
             >
+        </aside>
+        <main>
+            <h1>Noise complaints have been increasing</h1>
+            <p>
+                The number of noise complaints has increased dramatically over
+                the past few years. I'm looking into why this is.
+            </p>
+            <img
+                src="somerville noise complaints.png"
+                alt="A graph showing somerville noise complaints increasing from the dozens in 2015 to the thousands in 2019 and beyond, with a spike at the beginning of the pandemic."
+            />
+            <p>
+                Data scraped from
+                <a
+                    href="https://www.massport.com/logan-airport/about-logan/noise-abatement/complaints-by-townss/"
+                    >Massport</a
+                >
+                pdf reports.
+            </p>
         </main>
         <footer>
             <p>Made by <a href="https://cypressf.com">Cypress</a></p>
