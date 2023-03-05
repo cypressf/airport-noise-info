@@ -1,0 +1,19 @@
+- [ ] find flight route data
+- [ ] download historic flight route data
+- [ ] come up with a way to visualize it over time
+- [ ] implement the visualization over time
+- [ ] cross reference noise complaints in somerville with flight paths over time
+- [ ] determine a correlation
+- [ ] come up with proposed alternate routes
+- [ ] explain why the flights go over somerville with diagrams
+- [ ] explain FAA protocol for noise abatement with diagrams
+- [ ] explain impacts of noise pollution
+- [ ] are there other impacts of airplane noise?'s flying overhead (environmental, health?)
+- [ ] provide contact information for politicians who could help
+- [ ] create a petition sign-up sheet
+- [ ] create a community group or online discussion board
+- [ ] automate noise complaints with single click
+- [ ] print out flyer for streets in path
+- [ ] post to relevant social media groups (facebook, twitter, nextdoor, etc)
+- [ ] make a writeup of noise proofing techniques
+- [ ] make a writeup of ways to cope with noise
