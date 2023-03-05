@@ -3,7 +3,8 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Boston Logan Noise Info</title>
+        <title>Airplane Noise In Somerville</title>
+        <script src="d3.min.js"></script>
         <style>
             html {
                 font-family: sans-serif;
@@ -64,11 +65,10 @@
     </head>
     <body>
         <header>
-            <h1>Are you bothered by Boston airplane noise?</h1>
+            <h1>Are you bothered by airplane noise in Somerville, MA?</h1>
             <p>
-                Airplanes cause more noise taking off than landing. They cause
-                more noise when they are lower in the sky and have a higher
-                angle of attack.
+                You're not alone. The best way to get the FAA to change flight
+                patterns is to tell them they're bothering you.
             </p>
         </header>
         <aside>
@@ -87,14 +87,17 @@
             <h1>Noise complaints have been increasing</h1>
             <p>
                 The number of noise complaints has increased dramatically over
-                the past few years. I'm looking into why this is.
+                the past few years. My hypothesis is that the initial spike is
+                from people working from home during the heat of the pandemic
+                and the longer overall trend is due to the FAA changing flight
+                routes to take off over Somerville more frequently.
             </p>
             <img
                 src="somerville noise complaints.png"
                 alt="A graph showing somerville noise complaints increasing from the dozens in 2015 to the thousands in 2019 and beyond, with a spike at the beginning of the pandemic."
             />
             <p>
-                Data scraped from
+                <a href="data.csv">Data</a> scraped from
                 <a
                     href="https://www.massport.com/logan-airport/about-logan/noise-abatement/complaints-by-townss/"
                     >Massport</a
