@@ -282,8 +282,14 @@
                 }
             });
 
-            document.querySelector("button").addEventListener("click", () => {
+            const button = document.querySelector("button");
+            button.addEventListener("click", () => {
                 otherCitiesDiv.classList.toggle("hidden");
+                if (otherCitiesDiv.classList.contains("hidden")) {
+                    button.textContent = "Show more cities";
+                } else {
+                    button.textContent = "Hide other cities";
+                }
             });
 
             plot(somervilleDiv.clientWidth);
