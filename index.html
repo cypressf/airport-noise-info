@@ -62,9 +62,13 @@
                 color: var(--color);
                 font: inherit;
                 font-size: 80%;
+                overflow: visible;
             }
             select {
                 display: block;
+            }
+            #others {
+                margin-top: 100px;
             }
             .hidden {
                 display: none;
@@ -180,7 +184,8 @@
             ) => ({
                 marginTop,
                 marginBottom,
-                marginLeft: 55,
+                marginLeft: 40,
+                marginRight: 20,
                 inset: 0,
                 width,
                 height: height + marginBottom + marginTop,
@@ -196,6 +201,7 @@
                 fy: {
                     tickRotate: 90,
                     tickPadding: 20,
+                    padding: 0.38,
                 },
                 color: {
                     domain: [true],
@@ -264,10 +270,31 @@
                     ...baseConfig(otherData, {
                         width,
                         height: height * numCities,
-                        marginTop: 225,
+                        marginTop: 30,
                         marginBottom: 40,
                     }),
-                    marks: marks(otherData, width),
+                    marks: [
+                        ...marks(otherData, width),
+
+                        Plot.text(
+                            [
+                                {
+                                    x: stateOfEmergency.x,
+                                    y: -1000,
+                                    name: "covid restrictions",
+                                    highlight: true,
+                                },
+                            ],
+                            {
+                                fy: ["Medford"],
+                                x: "x",
+                                y: "y",
+                                text: "name",
+                                color: "#f99",
+                                fill: "highlight",
+                            }
+                        ),
+                    ],
                 });
                 otherCitiesDiv.replaceChildren(otherCitiesPlot);
             };
