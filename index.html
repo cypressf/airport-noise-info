@@ -3,14 +3,17 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Airplane Noise In Somerville</title>
+        <title>Airplane Noise In Somerville, MA</title>
         <style>
             :root {
                 --bg-color: #fff;
+                --bg-color-secondary: #eee;
+                --bg-color-secondary-bright: #ddd;
                 --color: #333;
                 --color-bright: #000;
                 --accent-color: aquamarine;
                 --accent-color-bright: rgb(55, 255, 188);
+                --button-padding: 24px;
             }
             body {
                 padding: 20px;
@@ -44,7 +47,7 @@
             .report {
                 display: block;
                 text-decoration: none;
-                padding: 1em;
+                padding: var(--button-padding);
                 margin-bottom: 1em;
             }
             .report {
@@ -61,6 +64,22 @@
             select {
                 display: block;
             }
+            .hidden {
+                display: none;
+            }
+            button {
+                border: none;
+                display: block;
+                font-size: inherit;
+                color: inherit;
+                text-decoration: underline;
+                background-color: var(--bg-color-secondary);
+                padding: var(--button-padding);
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: var(--bg-color-secondary-bright);
+            }
             @media screen and (max-width: 600px) {
                 body {
                     padding: 10px;
@@ -76,6 +95,8 @@
             @media (prefers-color-scheme: dark) {
                 :root {
                     --bg-color: #0e0f10;
+                    --bg-color-secondary: #323539;
+                    --bg-color-secondary-bright: #383c40;
                     --color: #c4c1bd;
                     --color-bright: #fff;
                     --accent-color: rgb(18, 79, 63);
@@ -86,10 +107,10 @@
     </head>
     <body>
         <header>
-            <h1>Are you bothered by airplane noise in Somerville, MA?</h1>
+            <h1>Bothered by airplane noise in Somerville?</h1>
             <p>
-                The best way to change the flight patterns is to report the
-                noise.
+                You should report it. That's the best way to get the FAA to
+                change flight paths.
             </p>
         </header>
         <aside>
@@ -97,7 +118,7 @@
                 id="massport"
                 class="report"
                 href="https://docs.google.com/forms/d/e/1FAIpQLSd9lQhA1a8Z9eCDLkyN6WnxCIftcMMxhZfkvecysKH4MytSlA/viewform"
-                >Report noise to Massport</a
+                >Report noise to MA</a
             >
 
             <a id="faa" class="report" href="https://noise.faa.gov/noise/"
@@ -105,21 +126,18 @@
             >
         </aside>
         <main>
-            <h1>Airplane noise is increasing in Somerville</h1>
+            <h1>Noise complaints are increasing</h1>
+            <div id="somerville"></div>
             <p>
                 You are not alone. The number of noise complaints in somerville
-                increased dramatically starting in 2019.
+                increased dramatically starting in 2019. My hypothesis is that
+                the initial spike was from a flight route change, and the
+                subsequent drop was from a reduction in flights due to covid. As
+                covid restrictions eased and people became more comfortable
+                flying, noise increased to the pre-pandemic peak.
             </p>
-            <div id="somerville"></div>
-
-            <p>
-                My hypothesis is that the initial spike was from a flight route
-                change, and the subsequent drop was from a reduction in flights
-                due to covid. As covid restrictions eased and people became more
-                comfortable flying, noise increased to the pre-pandemic peak.
-            </p>
-            <h1>Airplane noise is also increasing nearby</h1>
-            <div id="others"></div>
+            <button>Show more cities</button>
+            <div id="others" class="hidden"></div>
             <p>
                 <a href="data.csv">Data</a> scraped from
                 <a
@@ -143,9 +161,6 @@
                     .maxWidth,
                 10
             );
-            const height = 100;
-            const marginTop = 30;
-            const marginBottom = 30;
             const data = await d3.csv("data.csv", d3.autoType);
             const numCities = new Set(data.map((d) => d.community)).size;
             const stateOfEmergency = {
@@ -157,44 +172,12 @@
             );
             const otherData = data.filter((d) => d.community !== "Somerville");
 
-            const marks = (data) => [
-                Plot.areaY(data, {
-                    x: "date",
-                    y: "complaints",
-                    curve: "step",
-                }),
-                Plot.gridX({ interval: d3.utcYear.every(1) }),
-                Plot.ruleX([{ x: stateOfEmergency.x, highlight: true }], {
-                    x: "x",
-                    stroke: "#f99",
-                    strokeWidth: 2,
-                    stroke: "highlight",
-                }),
-                Plot.text(
-                    [
-                        {
-                            x: new Date("2020-03-15"),
-                            y: 6500,
-                            name: "covid restrictions",
-                            highlight: true,
-                        },
-                    ],
-                    {
-                        x: "x",
-                        y: "y",
-                        text: "name",
-                        color: "#f99",
-                        fill: "highlight",
-                    }
-                ),
-            ];
-
-            const baseConfig = (data, width) => ({
-                marginTop,
-                marginBottom,
+            const baseConfig = (data, width, height, margin) => ({
+                marginTop: margin.top,
+                marginBottom: margin.bottom,
                 marginLeft: 50,
                 width,
-                height: height + marginBottom + marginTop,
+                height: height + margin.bottom + margin.top,
                 y: {
                     domain: [0, 6000],
                 },
@@ -213,17 +196,71 @@
                 },
             });
 
+            const marks = (data, width) => [
+                Plot.areaY(data, {
+                    x: "date",
+                    y: "complaints",
+                    curve: "step",
+                    sort: {
+                        fy: {
+                            value: "y",
+                            reduce: "sum",
+                            reverse: true,
+                        },
+                    },
+                }),
+                Plot.gridX({ interval: d3.utcYear.every(1) }),
+                Plot.ruleX([{ x: stateOfEmergency.x, highlight: true }], {
+                    x: "x",
+                    stroke: "#f99",
+                    strokeWidth: 2,
+                    stroke: "highlight",
+                }),
+                Plot.axisX({
+                    tickRotate: width < 700 ? 45 : undefined,
+                    interval: d3.utcYear.every(1),
+                }),
+                Plot.axisY({
+                    label: "↑ Complaints",
+                }),
+            ];
+
             const plot = (width) => {
+                const height = 100;
                 const somervillePlot = Plot.plot({
-                    ...baseConfig(somervilleData, width),
-                    marks: marks(somervilleData),
+                    ...baseConfig(somervilleData, width, height, {
+                        top: 30,
+                        bottom: 30,
+                    }),
+                    marks: [
+                        Plot.text(
+                            [
+                                {
+                                    x: stateOfEmergency.x,
+                                    y: 6500,
+                                    name: "covid restrictions",
+                                    highlight: true,
+                                },
+                            ],
+                            {
+                                x: "x",
+                                y: "y",
+                                text: "name",
+                                color: "#f99",
+                                fill: "highlight",
+                            }
+                        ),
+                        ...marks(somervilleData, width),
+                    ],
                 });
                 somervilleDiv.replaceChildren(somervillePlot);
 
                 const otherCitiesPlot = Plot.plot({
-                    ...baseConfig(otherData, width),
-                    height: height * numCities + marginBottom + marginTop,
-                    marks: marks(otherData),
+                    ...baseConfig(otherData, width, height * numCities, {
+                        top: 300,
+                        bottom: 30,
+                    }),
+                    marks: marks(otherData, width),
                 });
                 otherCitiesDiv.replaceChildren(otherCitiesPlot);
             };
@@ -232,6 +269,10 @@
                 if (somervilleDiv.clientWidth < maxWidth) {
                     plot(somervilleDiv.clientWidth);
                 }
+            });
+
+            document.querySelector("button").addEventListener("click", () => {
+                otherCitiesDiv.classList.toggle("hidden");
             });
 
             plot(somervilleDiv.clientWidth);
