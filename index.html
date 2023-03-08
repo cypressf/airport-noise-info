@@ -4,15 +4,27 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Airplane Noise In Somerville</title>
-        <script src="d3.min.js"></script>
         <style>
-            html {
-                font-family: sans-serif;
-                color: #333;
+            :root {
+                --bg-color: #fff;
+                --color: #333;
+                --color-bright: #000;
+                --accent-color: aquamarine;
+                --accent-color-bright: rgb(55, 255, 188);
             }
             body {
                 padding: 20px;
                 margin: 0;
+                font-family: sans-serif;
+                background-color: var(--bg-color);
+                color: var(--color);
+            }
+            header,
+            aside,
+            main,
+            footer {
+                max-width: 800px;
+                margin: 0 auto;
             }
             a {
                 color: inherit;
@@ -35,13 +47,18 @@
                 margin-bottom: 1em;
             }
             .report {
-                background-color: aquamarine;
+                background-color: var(--accent-color);
             }
             .report:hover {
-                background-color: rgb(55, 255, 188);
+                background-color: var(--accent-color-bright);
+                color: var(--color-bright);
             }
-            .report:active {
-                background-color: rgb(0, 255, 255);
+            svg[class^="plot-"] {
+                background-color: var(--bg-color);
+                color: var(--color);
+            }
+            select {
+                display: block;
             }
             @media screen and (max-width: 600px) {
                 body {
@@ -54,12 +71,15 @@
                     margin-left: 0;
                 }
             }
-            #grawlix {
-                color: rgb(115, 36, 36);
-                background-color: rgb(255, 215, 215);
-            }
-            img {
-                max-width: 100%;
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg-color: #0e0f10;
+                    --color: #c4c1bd;
+                    --color-bright: #fff;
+                    --accent-color: rgb(18, 79, 63);
+                    --accent-color-bright: rgb(0, 96, 72);
+                }
             }
         </style>
     </head>
@@ -84,18 +104,18 @@
             >
         </aside>
         <main>
-            <h1>Noise complaints have been increasing</h1>
+            <h1>Noise complaints are increasing</h1>
+            <div id="somerville-plot"></div>
+
             <p>
                 The number of noise complaints has increased dramatically over
                 the past few years. My hypothesis is that the initial spike is
-                from people working from home during the heat of the pandemic
-                and the longer overall trend is due to the FAA changing flight
-                routes to take off over Somerville more frequently.
+                from a flight route change, and the subsequent drop is from a
+                reduction in flights due to the covid state of emergency. As
+                covid restrictions eased and people became more comfortable
+                flying, noise increased to the pre-pandemic peak.
             </p>
-            <img
-                src="somerville noise complaints.png"
-                alt="A graph showing somerville noise complaints increasing from the dozens in 2015 to the thousands in 2019 and beyond, with a spike at the beginning of the pandemic."
-            />
+
             <p>
                 <a href="data.csv">Data</a> scraped from
                 <a
@@ -108,5 +128,64 @@
         <footer>
             <p>Made by <a href="https://cypressf.com">Cypress</a></p>
         </footer>
+        <script type="module">
+            import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
+            import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+            const somervilleDiv = document.querySelector("#somerville-plot");
+            const maxWidth = parseInt(
+                window.getComputedStyle(document.querySelector("main"))
+                    .maxWidth,
+                10
+            );
+            const data = await d3.csv("data.csv", d3.autoType);
+            const stateOfEmergency = {
+                x: new Date("2020-03-10"),
+                x2: new Date("2021-06-15"),
+            };
+            const somervilleData = data.filter(
+                (d) => d.community === "Somerville"
+            );
+
+            const baseMarks = (filter) => [
+                Plot.areaY(data, {
+                    filter,
+                    x: "date",
+                    y: "complaints",
+                    curve: "step",
+                }),
+                Plot.gridX({ interval: d3.utcYear.every(1) }),
+            ];
+
+            const plot = (width) => {
+                const baseConfig = {
+                    marginLeft: 50,
+                    width,
+                    height: 200,
+                    y: {
+                        domain: [0, 6000],
+                    },
+                };
+
+                const somervillePlot = Plot.plot({
+                    ...baseConfig,
+                    marks: baseMarks((d) => d.community === "Somerville"),
+                });
+
+                somervilleDiv.replaceChildren(somervillePlot);
+            };
+
+            // set plot width when window resizes
+            window.addEventListener("resize", () => {
+                if (somervilleDiv.clientWidth < maxWidth) {
+                    plot(somervilleDiv.clientWidth);
+                    console.log(
+                        `update plot width ${somervilleDiv.clientWidth}`
+                    );
+                }
+            });
+
+            plot(somervilleDiv.clientWidth);
+        </script>
     </body>
 </html>
