@@ -18,6 +18,7 @@
                 font-family: sans-serif;
                 background-color: var(--bg-color);
                 color: var(--color);
+                line-height: 1.5;
             }
             header,
             aside,
@@ -87,8 +88,8 @@
         <header>
             <h1>Are you bothered by airplane noise in Somerville, MA?</h1>
             <p>
-                You're not alone. The best way to get the FAA to change flight
-                patterns is to tell them they're bothering you.
+                The best way to change the flight patterns is to report the
+                noise.
             </p>
         </header>
         <aside>
@@ -104,18 +105,21 @@
             >
         </aside>
         <main>
-            <h1>Noise complaints are increasing</h1>
-            <div id="somerville-plot"></div>
+            <h1>Airplane noise is increasing in Somerville</h1>
+            <p>
+                You are not alone. The number of noise complaints in somerville
+                increased dramatically starting in 2019.
+            </p>
+            <div id="somerville"></div>
 
             <p>
-                The number of noise complaints has increased dramatically over
-                the past few years. My hypothesis is that the initial spike is
-                from a flight route change, and the subsequent drop is from a
-                reduction in flights due to the covid state of emergency. As
-                covid restrictions eased and people became more comfortable
-                flying, noise increased to the pre-pandemic peak.
+                My hypothesis is that the initial spike was from a flight route
+                change, and the subsequent drop was from a reduction in flights
+                due to covid. As covid restrictions eased and people became more
+                comfortable flying, noise increased to the pre-pandemic peak.
             </p>
-
+            <h1>Airplane noise is also increasing nearby</h1>
+            <div id="others"></div>
             <p>
                 <a href="data.csv">Data</a> scraped from
                 <a
@@ -132,13 +136,18 @@
             import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
             import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-            const somervilleDiv = document.querySelector("#somerville-plot");
+            const somervilleDiv = document.querySelector("#somerville");
+            const otherCitiesDiv = document.querySelector("#others");
             const maxWidth = parseInt(
                 window.getComputedStyle(document.querySelector("main"))
                     .maxWidth,
                 10
             );
+            const height = 100;
+            const marginTop = 30;
+            const marginBottom = 30;
             const data = await d3.csv("data.csv", d3.autoType);
+            const numCities = new Set(data.map((d) => d.community)).size;
             const stateOfEmergency = {
                 x: new Date("2020-03-10"),
                 x2: new Date("2021-06-15"),
@@ -146,42 +155,82 @@
             const somervilleData = data.filter(
                 (d) => d.community === "Somerville"
             );
+            const otherData = data.filter((d) => d.community !== "Somerville");
 
-            const baseMarks = (filter) => [
+            const marks = (data) => [
                 Plot.areaY(data, {
-                    filter,
                     x: "date",
                     y: "complaints",
                     curve: "step",
                 }),
                 Plot.gridX({ interval: d3.utcYear.every(1) }),
+                Plot.ruleX([{ x: stateOfEmergency.x, highlight: true }], {
+                    x: "x",
+                    stroke: "#f99",
+                    strokeWidth: 2,
+                    stroke: "highlight",
+                }),
+                Plot.text(
+                    [
+                        {
+                            x: new Date("2020-03-15"),
+                            y: 6500,
+                            name: "covid restrictions",
+                            highlight: true,
+                        },
+                    ],
+                    {
+                        x: "x",
+                        y: "y",
+                        text: "name",
+                        color: "#f99",
+                        fill: "highlight",
+                    }
+                ),
             ];
 
+            const baseConfig = (data, width) => ({
+                marginTop,
+                marginBottom,
+                marginLeft: 50,
+                width,
+                height: height + marginBottom + marginTop,
+                y: {
+                    domain: [0, 6000],
+                },
+                facet: {
+                    data,
+                    y: "community",
+                    label: null,
+                },
+                fy: {
+                    tickRotate: 90,
+                    tickPadding: 20,
+                },
+                color: {
+                    domain: [true],
+                    range: ["orange"],
+                },
+            });
+
             const plot = (width) => {
-                const baseConfig = {
-                    marginLeft: 50,
-                    width,
-                    height: 200,
-                    y: {
-                        domain: [0, 6000],
-                    },
-                };
-
                 const somervillePlot = Plot.plot({
-                    ...baseConfig,
-                    marks: baseMarks((d) => d.community === "Somerville"),
+                    ...baseConfig(somervilleData, width),
+                    marks: marks(somervilleData),
                 });
-
                 somervilleDiv.replaceChildren(somervillePlot);
+
+                const otherCitiesPlot = Plot.plot({
+                    ...baseConfig(otherData, width),
+                    height: height * numCities + marginBottom + marginTop,
+                    marks: marks(otherData),
+                });
+                otherCitiesDiv.replaceChildren(otherCitiesPlot);
             };
 
-            // set plot width when window resizes
             window.addEventListener("resize", () => {
                 if (somervilleDiv.clientWidth < maxWidth) {
                     plot(somervilleDiv.clientWidth);
-                    console.log(
-                        `update plot width ${somervilleDiv.clientWidth}`
-                    );
                 }
             });
 
