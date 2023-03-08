@@ -60,6 +60,8 @@
             svg[class^="plot-"] {
                 background-color: var(--bg-color);
                 color: var(--color);
+                font: inherit;
+                font-size: 80%;
             }
             select {
                 display: block;
@@ -70,15 +72,15 @@
             button {
                 border: none;
                 display: block;
-                font-size: inherit;
                 color: inherit;
+                font-size: inherit;
+                background-color: inherit;
                 text-decoration: underline;
-                background-color: var(--bg-color-secondary);
-                padding: var(--button-padding);
+                padding: var(--button-padding) 0;
                 cursor: pointer;
             }
             button:hover {
-                background-color: var(--bg-color-secondary-bright);
+                background-color: var(--bg-color-secondary);
             }
             @media screen and (max-width: 600px) {
                 body {
@@ -172,14 +174,19 @@
             );
             const otherData = data.filter((d) => d.community !== "Somerville");
 
-            const baseConfig = (data, width, height, margin) => ({
-                marginTop: margin.top,
-                marginBottom: margin.bottom,
-                marginLeft: 50,
+            const baseConfig = (
+                data,
+                { width, height, marginTop, marginBottom }
+            ) => ({
+                marginTop,
+                marginBottom,
+                marginLeft: 55,
+                inset: 0,
                 width,
-                height: height + margin.bottom + margin.top,
+                height: height + marginBottom + marginTop,
                 y: {
                     domain: [0, 6000],
+                    label: "↑ Complaints",
                 },
                 facet: {
                     data,
@@ -212,7 +219,6 @@
                 Plot.gridX({ interval: d3.utcYear.every(1) }),
                 Plot.ruleX([{ x: stateOfEmergency.x, highlight: true }], {
                     x: "x",
-                    stroke: "#f99",
                     strokeWidth: 2,
                     stroke: "highlight",
                 }),
@@ -220,24 +226,23 @@
                     tickRotate: width < 700 ? 45 : undefined,
                     interval: d3.utcYear.every(1),
                 }),
-                Plot.axisY({
-                    label: "↑ Complaints",
-                }),
             ];
 
             const plot = (width) => {
                 const height = 100;
                 const somervillePlot = Plot.plot({
-                    ...baseConfig(somervilleData, width, height, {
-                        top: 30,
-                        bottom: 30,
+                    ...baseConfig(somervilleData, {
+                        width,
+                        height,
+                        marginTop: 30,
+                        marginBottom: 40,
                     }),
                     marks: [
                         Plot.text(
                             [
                                 {
                                     x: stateOfEmergency.x,
-                                    y: 6500,
+                                    y: 7300,
                                     name: "covid restrictions",
                                     highlight: true,
                                 },
@@ -256,18 +261,24 @@
                 somervilleDiv.replaceChildren(somervillePlot);
 
                 const otherCitiesPlot = Plot.plot({
-                    ...baseConfig(otherData, width, height * numCities, {
-                        top: 300,
-                        bottom: 30,
+                    ...baseConfig(otherData, {
+                        width,
+                        height: height * numCities,
+                        marginTop: 225,
+                        marginBottom: 40,
                     }),
                     marks: marks(otherData, width),
                 });
                 otherCitiesDiv.replaceChildren(otherCitiesPlot);
             };
 
+            let prevWidth = somervilleDiv.clientWidth;
+
             window.addEventListener("resize", () => {
-                if (somervilleDiv.clientWidth < maxWidth) {
-                    plot(somervilleDiv.clientWidth);
+                const width = somervilleDiv.clientWidth;
+                if (prevWidth != width) {
+                    plot(width);
+                    prevWidth = width;
                 }
             });
 
